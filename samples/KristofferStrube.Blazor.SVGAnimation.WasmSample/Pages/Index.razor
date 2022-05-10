@@ -1,0 +1,53 @@
+﻿@page "/"
+@inject ISVGAnimationService SVGAnimationService;
+
+<PageTitle>Blazor.SVGAnimation - Begin Animation</PageTitle>
+
+<h2>Click the paper to begin SVG Animation</h2>
+
+<svg width="100px" height="100px">
+    <rect @onclick="PaperClicked"
+          x="20"
+          y="10"
+          width="60"
+          height="80"
+          stroke-width="2"
+          stroke="black"
+          fill="white"></rect>
+    <path d="M 30 30 L 70 70 M 70 30 L 30 70"
+          stroke-width="5"
+          stroke="red"
+          stroke-linecap="round"
+          style="pointer-events:none;">
+        <animate @ref="dataAnimationElementReference"
+                 attributeName="d"
+                 values="M 30 30 L 70 70 M 70 30 L 30 70;M 40 40 L 50 50 M 70 30 L 50 50"
+                 begin="indefinite"
+                 dur="3s"
+                 fill="freeze" />
+        <animate @ref="colorAnimationElementReference"
+                 attributeName="stroke"
+                 values="red;orange;green"
+                 begin="indefinite"
+                 dur="3s"
+                 fill="freeze" />
+    </path>
+</svg>
+
+@code {
+    protected ElementReference dataAnimationElementReference { get; set; }
+    protected ElementReference colorAnimationElementReference { get; set; }
+    protected bool clicked = false;
+
+    private async void PaperClicked()
+    {
+        if (!clicked)
+        {
+            var dataAnimation = await SVGAnimationService.GreateSVGAnimationElement(dataAnimationElementReference);
+            var colorAnimation = await SVGAnimationService.GreateSVGAnimationElement(colorAnimationElementReference);
+            await dataAnimation.BeginElementAsync();
+            await colorAnimation.BeginElementAsync();
+        }
+        clicked = true;
+    }
+}
