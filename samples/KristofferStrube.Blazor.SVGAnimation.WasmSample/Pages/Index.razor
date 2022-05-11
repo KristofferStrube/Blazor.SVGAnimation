@@ -37,17 +37,12 @@
 @code {
     protected ElementReference dataAnimationElementReference { get; set; }
     protected ElementReference colorAnimationElementReference { get; set; }
-    protected bool clicked = false;
 
     private async void PaperClicked()
     {
-        if (!clicked)
-        {
-            var dataAnimation = await SVGAnimationService.GreateSVGAnimationElement(dataAnimationElementReference);
-            var colorAnimation = await SVGAnimationService.GreateSVGAnimationElement(colorAnimationElementReference);
-            await dataAnimation.BeginElementAsync();
-            await colorAnimation.BeginElementAsync();
-        }
-        clicked = true;
+        var dataAnimation = await SVGAnimationService.GreateSVGAnimationElement(dataAnimationElementReference);
+        var colorAnimation = await SVGAnimationService.GreateSVGAnimationElement(colorAnimationElementReference);
+        await dataAnimation.BeginElementAsync();
+        await colorAnimation.BeginElementAsync();
     }
 }
