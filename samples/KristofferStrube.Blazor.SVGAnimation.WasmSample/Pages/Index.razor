@@ -33,15 +33,41 @@
                  fill="freeze" />
     </path>
 </svg>
+<textarea style="height:100px;width:100%;" disabled="disabled">
+    @log
+</textarea>
 
 @code {
     protected ElementReference dataAnimationElementReference { get; set; }
     protected ElementReference colorAnimationElementReference { get; set; }
+    protected SVGAnimationElement dataAnimation;
+    protected SVGAnimationElement colorAnimation;
+    protected string log = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            dataAnimation = await SVGAnimationService.GreateSVGAnimationElement(dataAnimationElementReference);
+            colorAnimation = await SVGAnimationService.GreateSVGAnimationElement(colorAnimationElementReference);
+
+            await dataAnimation.SubscribeToBegin(() => {
+                log += "Begin event fired\n";
+                StateHasChanged();
+            });
+            await dataAnimation.SubscribeToEnd(() => {
+                log += "End event fired\n";
+                StateHasChanged();
+            });
+            await dataAnimation.SubscribeToRepeat(() => {
+                log += "Repeat event fired\n";
+                StateHasChanged();
+            });
+        }
+    }
 
     private async void PaperClicked()
     {
-        var dataAnimation = await SVGAnimationService.GreateSVGAnimationElement(dataAnimationElementReference);
-        var colorAnimation = await SVGAnimationService.GreateSVGAnimationElement(colorAnimationElementReference);
         await dataAnimation.BeginElementAsync();
         await colorAnimation.BeginElementAsync();
     }
