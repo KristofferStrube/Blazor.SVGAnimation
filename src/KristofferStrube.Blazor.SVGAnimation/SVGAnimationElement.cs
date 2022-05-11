@@ -3,10 +3,11 @@ using Microsoft.JSInterop;
 
 namespace KristofferStrube.Blazor.SVGAnimation;
 
-public class SVGAnimationElement : IAsyncDisposable
+public class SVGAnimationElement : IDisposable
 {
     public readonly ElementReference ElementReference;
     protected readonly IJSInProcessObjectReference helper;
+    private DotNetObjectReference<SVGAnimationElement> objRef;
     private Action? OnBegin = null;
     private Action? OnEnd = null;
     private Action? OnRepeat = null;
@@ -15,6 +16,7 @@ public class SVGAnimationElement : IAsyncDisposable
     {
         ElementReference = elementReference;
         this.helper = helper;
+        objRef = DotNetObjectReference.Create(this);
     }
 
     public async ValueTask BeginElementAsync()
@@ -31,7 +33,7 @@ public class SVGAnimationElement : IAsyncDisposable
     {
         if (OnBegin is null)
         {
-            await helper.InvokeVoidAsync("subscribeToBegin", ElementReference, DotNetObjectReference.Create(this));
+            await helper.InvokeVoidAsync("subscribeToBegin", ElementReference, objRef);
         }
         OnBegin += action;
     }
@@ -40,7 +42,7 @@ public class SVGAnimationElement : IAsyncDisposable
     {
         if (OnEnd is null)
         {
-            await helper.InvokeVoidAsync("subscribeToEnd", ElementReference, DotNetObjectReference.Create(this));
+            await helper.InvokeVoidAsync("subscribeToEnd", ElementReference, objRef);
         }
         OnEnd += action;
     }
@@ -49,7 +51,7 @@ public class SVGAnimationElement : IAsyncDisposable
     {
         if (OnRepeat is null)
         {
-            await helper.InvokeVoidAsync("subscribeToRepeat", ElementReference, DotNetObjectReference.Create(this));
+            await helper.InvokeVoidAsync("subscribeToRepeat", ElementReference, objRef);
         }
         OnRepeat += action;
     }
@@ -63,9 +65,8 @@ public class SVGAnimationElement : IAsyncDisposable
     [JSInvokable("InvokeOnRepeat")]
     public void InvokeOnRepeat() => OnRepeat?.Invoke();
 
-    public ValueTask DisposeAsync()
+    public void Dispose()
     {
-        // TODO
-        return ValueTask.CompletedTask;
+        objRef.Dispose();
     }
 }
