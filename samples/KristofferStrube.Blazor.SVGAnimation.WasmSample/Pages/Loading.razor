@@ -4,8 +4,18 @@
 <PageTitle>Blazor.SVGAnimation - Loading Animation</PageTitle>
 <p>We can <code>begin</code> an animation, have it run <code>indefinite</code>, and <code>end</code> it at a full cycle to have a nice stop</p>
 
-<button class="btn btn-success" @onclick="StartAnimation">Start Loading Animation</button>
-<button class="btn btn-warning" @onclick="EndAnimation">End Loading Animation</button>
+@switch (Status)
+{
+    case AnimationStatus.Still:
+        <button class="btn btn-success" style="width:200px;" @onclick="StartAnimation">Start Loading Animation</button>
+        break;
+    case AnimationStatus.Running:
+        <button class="btn btn-danger" style="width:200px;" @onclick="EndAnimation">End Loading Animation</button>
+        break;
+    case AnimationStatus.Stopping:
+        <button class="btn btn-warning" disabled style="width:200px;">Stopping ...</button>
+        break;
+}
 <br />
 
 <svg width="100px" height="100px">
@@ -33,7 +43,7 @@
     protected ElementReference arrowAnimateElement { get; set; }
     protected SVGAnimationElement arrowAnimation;
     protected AnimationStatus Status = AnimationStatus.Still;
-    protected float animationTime = 1f;
+    protected float animationTime = 2f;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -41,8 +51,16 @@
         {
             arrowAnimation = await SVGAnimationService.GreateSVGAnimationElement(arrowAnimateElement);
 
-            await arrowAnimation.SubscribeToBeginAsync(() => Status = AnimationStatus.Running);
-            await arrowAnimation.SubscribeToEndAsync(() => Status = AnimationStatus.Still);
+            await arrowAnimation.SubscribeToBeginAsync(() =>
+            {
+                Status = AnimationStatus.Running;
+                StateHasChanged();
+            });
+            await arrowAnimation.SubscribeToEndAsync(() =>
+            {
+                Status = AnimationStatus.Still;
+                StateHasChanged();
+            });
         }
     }
 
@@ -62,9 +80,10 @@
             return;
         }
         Status = AnimationStatus.Stopping;
+        StateHasChanged();
         var startTime = await arrowAnimation.GetStartTimeAsync();
         var timeInPeriod = (await arrowAnimation.GetCurrentTimeAsync() - startTime) % animationTime;
-        await arrowAnimation.EndElementAtAsync(1 - timeInPeriod);
+        await arrowAnimation.EndElementAtAsync(animationTime - timeInPeriod);
     }
 
     protected enum AnimationStatus
