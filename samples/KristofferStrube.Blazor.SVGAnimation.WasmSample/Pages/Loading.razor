@@ -34,7 +34,6 @@
     protected SVGAnimationElement arrowAnimation;
     protected AnimationStatus Status = AnimationStatus.Still;
     protected float animationTime = 1f;
-    protected float startTime = 0;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -53,7 +52,6 @@
         {
             return;
         }
-        startTime = await arrowAnimation.GetCurrentTimeAsync();
         await arrowAnimation.BeginElementAsync();
     }
 
@@ -64,6 +62,7 @@
             return;
         }
         Status = AnimationStatus.Stopping;
+        var startTime = await arrowAnimation.GetStartTimeAsync();
         var timeInPeriod = (await arrowAnimation.GetCurrentTimeAsync() - startTime) % animationTime;
         await arrowAnimation.EndElementAtAsync(1 - timeInPeriod);
     }
