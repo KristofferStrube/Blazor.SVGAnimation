@@ -1,10 +1,6 @@
-export function beginElement(element) {
-    element.beginElement();
-}
+export function getJSReference(element) { return element; }
 
-export function endElement(element) {
-    element.endElement();
-}
+export function targetElement(element) { return element.targetElement; }
 
 export function subscribeToBegin(element, objRef) {
     element.addEventListener("beginEvent", () => objRef.invokeMethod("InvokeOnBegin"));

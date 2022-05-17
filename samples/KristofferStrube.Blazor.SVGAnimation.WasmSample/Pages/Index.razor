@@ -3,7 +3,7 @@
 
 <PageTitle>Blazor.SVGAnimation - Begin Animation</PageTitle>
 
-<h2>Click the paper to begin SVG Animation</h2>
+<p>Click the paper to <code>begin</code> a SVG Animation</p>
 
 <svg width="100px" height="100px">
     <rect @onclick="PaperClicked"
@@ -51,15 +51,15 @@
             dataAnimation = await SVGAnimationService.GreateSVGAnimationElement(dataAnimationElementReference);
             colorAnimation = await SVGAnimationService.GreateSVGAnimationElement(colorAnimationElementReference);
 
-            await dataAnimation.SubscribeToBegin(() => {
+            await dataAnimation.SubscribeToBeginAsync(() => {
                 log += "Begin event fired\n";
                 StateHasChanged();
             });
-            await dataAnimation.SubscribeToEnd(() => {
+            await dataAnimation.SubscribeToEndAsync(() => {
                 log += "End event fired\n";
                 StateHasChanged();
             });
-            await dataAnimation.SubscribeToRepeat(() => {
+            await dataAnimation.SubscribeToRepeatAsync(() => {
                 log += "Repeat event fired\n";
                 StateHasChanged();
             });
