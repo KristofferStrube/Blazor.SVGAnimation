@@ -9,4 +9,4 @@ The specs for the API can be found at https://svgwg.org/specs/animations/#IDL
 The sample project can be demoed at https://kristofferstrube.github.io/Blazor.SVGAnimation/
 
 ## Future Work
-This is only a small part of the API and more parts of the API like subscribing to events will be added later.
+This will soon be released as a Nuget package.
