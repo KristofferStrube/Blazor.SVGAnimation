@@ -3,6 +3,9 @@ using Microsoft.JSInterop;
 
 namespace KristofferStrube.Blazor.SVGAnimation;
 
+/// <summary>
+/// <see href="https://svgwg.org/specs/animations/#InterfaceSVGAnimationElement">SVGAnimationElement browser specs</see>
+/// </summary>
 public class SVGAnimationElement : IAsyncDisposable
 {
     public readonly ElementReference ElementReference;
