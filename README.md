@@ -17,8 +17,6 @@ The sample project can be demoed at https://kristofferstrube.github.io/Blazor.SV
 
 On each page you can find the corresponding code for the example in the top right corner.
 
-On the main page you can see if the API has at least minimal support in the used browser.
-
 # Getting Started
 ## Prerequisites
 You need to install .NET 6.0 or newer to use the library.
