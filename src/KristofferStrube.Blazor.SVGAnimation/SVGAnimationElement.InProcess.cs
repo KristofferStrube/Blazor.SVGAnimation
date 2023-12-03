@@ -108,37 +108,37 @@ public class SVGAnimationElementInProcess : SVGAnimationElement, IEventTargetInP
     }
     public float GetStartTime()
     {
-        return inProcessHelper.Invoke<float>("getStartTime");
+        return JSReference.Invoke<float>("getStartTime");
     }
 
     public float GetCurrentTime()
     {
-        return inProcessHelper.Invoke<float>("getCurrentTime");
+        return JSReference.Invoke<float>("getCurrentTime");
     }
 
     public float GetSimpleDuration()
     {
-        return inProcessHelper.Invoke<float>("getSimpleDuration");
+        return JSReference.Invoke<float>("getSimpleDuration");
     }
 
     public void BeginElement()
     {
-        inProcessHelper.InvokeVoid("beginElement");
+        JSReference.InvokeVoid("beginElement");
     }
 
     public void BeginElementAt(float offset)
     {
-        inProcessHelper.InvokeVoid("beginElementAt", offset);
+        JSReference.InvokeVoid("beginElementAt", offset);
     }
 
     public void EndElement()
     {
-        inProcessHelper.InvokeVoid("endElement");
+        JSReference.InvokeVoid("endElement");
     }
 
     public void EndElementAt(float offset)
     {
-        inProcessHelper.InvokeVoid("endElementAt", offset);
+        JSReference.InvokeVoid("endElementAt", offset);
     }
 
     public new async ValueTask DisposeAsync()
