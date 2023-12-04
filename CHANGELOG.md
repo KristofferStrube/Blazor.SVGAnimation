@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added correct wrapping for events via the `AddOnBeginEventListenerAsync`, `AddOnEndEventListenerAsync`, and `AddOnRepeatEventListenerAsync` methods on the `SVGAnimationElement` class.
 - Added a way to remove listeners via the `RemoveOnBeginEventListenerAsync`, `RemoveOnEndEventListenerAsync`, and `RemoveOnRepeatEventListenerAsync` methods on the `SVGAnimationElement` class.
 - Added `SVGAnimationElementInProcess` class which surfaces WASM-only in-process variants of all methods available in `SVGAnimationElement`.
+### Changed
+- Changed it so that `SVGAnimationElement` now inherits from the `EventTarget` wrapper from the `Blazor.DOM` library to be closer to the API specification.
 ### Deprecated
 - The `SVGAnimationService` that was previously used for creating wrappers is marked as obsolete as it doesn't follow our current pattern for creating wrapper instances. Use the `SVGAnimationElement.CreateAsync` method instead.
 - The In-process accessor for `TargetElement` on `SVGAnimationElement` has been marked as obsolete as it is not supported in Blazor Server.
