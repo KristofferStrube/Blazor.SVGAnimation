@@ -1,0 +1,109 @@
+﻿@page "/Loading"
+@rendermode InteractiveServer
+@using KristofferStrube.Blazor.DOM
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Blazor.SVGAnimation - Loading Animation</PageTitle>
+<p>We can <code>begin</code> an animation, have it run <code>indefinite</code>, and <code>end</code> it at a full cycle to have a nice stop</p>
+
+@switch (Status)
+{
+    case AnimationStatus.Still:
+        <button class="btn btn-success" style="width:200px;" @onclick="StartAnimation">Start Loading Animation</button>
+        break;
+    case AnimationStatus.Running:
+        <button class="btn btn-danger" style="width:200px;" @onclick="EndAnimation">End Loading Animation</button>
+        break;
+    case AnimationStatus.Stopping:
+        <button class="btn btn-warning" disabled style="width:200px;">Stopping ...</button>
+        break;
+}
+<br />
+
+<svg width="100px" height="100px">
+    <g transform="rotate(45 50 50)">
+        <circle r="25"
+                cx="50"
+                cy="50"
+                stroke-width="10"
+                stroke="grey"
+                fill="white"></circle>
+        <rect x="51" y="20" width="29" height="30" fill="white"></rect>
+        <path fill="grey" d="M 50 10 l 15 15 -15 15 z"></path>
+        <animateTransform @ref="arrowAnimateElement"
+                          attributeName="transform"
+                          type="rotate"
+                          begin="indefinite"
+                          repeatCount="indefinite"
+                          dur="2s"
+                          from="45 50 50"
+                          to="405 50 50" />
+    </g>
+</svg>
+
+@code {
+    protected ElementReference arrowAnimateElement { get; set; }
+    protected SVGAnimationElement? arrowAnimation;
+    protected EventListener<Event> beginEventListener = default!;
+    protected EventListener<Event> endEventListener = default!;
+    protected AnimationStatus Status = AnimationStatus.Still;
+    protected float animationTime = 2f;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        arrowAnimation = await SVGAnimationElement.CreateAsync(JSRuntime, arrowAnimateElement);
+
+        beginEventListener = await arrowAnimation.AddOnBeginEventListenerAsync(_ =>
+        {
+            Status = AnimationStatus.Running;
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
+        endEventListener = await arrowAnimation.AddOnEndEventListenerAsync(_ =>
+        {
+            Status = AnimationStatus.Still;
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
+    }
+
+    private async void StartAnimation()
+    {
+        if (Status is not AnimationStatus.Still || arrowAnimation is null)
+        {
+            return;
+        }
+        await arrowAnimation.BeginElementAsync();
+    }
+
+    private async void EndAnimation()
+    {
+        if (Status is not AnimationStatus.Running || arrowAnimation is null)
+        {
+            return;
+        }
+        Status = AnimationStatus.Stopping;
+        StateHasChanged();
+        var startTime = await arrowAnimation.GetStartTimeAsync();
+        var timeInPeriod = (await arrowAnimation.GetCurrentTimeAsync() - startTime) % animationTime;
+        await arrowAnimation.EndElementAtAsync(animationTime - timeInPeriod);
+    }
+
+    protected enum AnimationStatus
+    {
+        Still,
+        Running,
+        Stopping
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (arrowAnimation is null) return;
+
+        await arrowAnimation.RemoveOnBeginEventListenerAsync(beginEventListener);
+        await arrowAnimation.RemoveOnEndEventListenerAsync(endEventListener);
+    }
+}

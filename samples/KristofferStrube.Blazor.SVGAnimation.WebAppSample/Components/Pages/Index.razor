@@ -1,0 +1,92 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using KristofferStrube.Blazor.DOM
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Blazor.SVGAnimation - Begin Animation</PageTitle>
+
+<p>Click the paper to <code>begin</code> a SVG Animation</p>
+
+<svg width="100px" height="100px">
+    <rect @onclick="PaperClicked"
+          x="20"
+          y="10"
+          width="60"
+          height="80"
+          stroke-width="2"
+          stroke="black"
+          fill="white"></rect>
+    <path d="M 30 30 L 70 70 M 70 30 L 30 70"
+          stroke-width="5"
+          stroke="red"
+          stroke-linecap="round"
+          style="pointer-events:none;">
+        <animate @ref="dataAnimationElementReference"
+                 attributeName="d"
+                 values="M 30 30 L 70 70 M 70 30 L 30 70;M 40 40 L 50 50 M 70 30 L 50 50"
+                 begin="indefinite"
+                 dur="3s"
+                 fill="freeze" />
+        <animate @ref="colorAnimationElementReference"
+                 attributeName="stroke"
+                 values="red;orange;green"
+                 begin="indefinite"
+                 dur="3s"
+                 fill="freeze" />
+    </path>
+</svg>
+<textarea style="height:100px;width:100%;" disabled="disabled">
+    @log
+</textarea>
+
+@code {
+    protected ElementReference dataAnimationElementReference { get; set; }
+    protected ElementReference colorAnimationElementReference { get; set; }
+    protected SVGAnimationElement dataAnimation = default!;
+    protected SVGAnimationElement colorAnimation = default!;
+    protected EventListener<Event> beginEventListener = default!;
+    protected EventListener<Event> endEventListener = default!;
+    protected EventListener<Event> repeatEventListener = default!;
+    protected string log = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        dataAnimation = await SVGAnimationElement.CreateAsync(JSRuntime, dataAnimationElementReference);
+        colorAnimation = await SVGAnimationElement.CreateAsync(JSRuntime, colorAnimationElementReference);
+
+        beginEventListener = await dataAnimation.AddOnBeginEventListenerAsync(_ =>
+        {
+            log += "Begin event fired\n";
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
+        endEventListener = await dataAnimation.AddOnEndEventListenerAsync(_ =>
+        {
+            log += "End event fired\n";
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
+        repeatEventListener = await dataAnimation.AddOnRepeatEventListenerAsync(_ =>
+        {
+            log += "Repeat event fired\n";
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
+    }
+
+    private async Task PaperClicked()
+    {
+        await dataAnimation.BeginElementAsync();
+        await colorAnimation.BeginElementAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await dataAnimation.RemoveOnBeginEventListenerAsync(beginEventListener);
+        await dataAnimation.RemoveOnBeginEventListenerAsync(endEventListener);
+        await dataAnimation.RemoveOnBeginEventListenerAsync(repeatEventListener);
+    }
+}

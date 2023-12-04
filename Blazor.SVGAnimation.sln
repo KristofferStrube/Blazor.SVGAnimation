@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KristofferStrube.Blazor.SVG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KristofferStrube.Blazor.SVGAnimation.WasmSample", "samples\KristofferStrube.Blazor.SVGAnimation.WasmSample\KristofferStrube.Blazor.SVGAnimation.WasmSample.csproj", "{D9942C3C-CB70-4D48-9E6E-401FB2B71DAF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KristofferStrube.Blazor.SVGAnimation.WebAppSample", "samples\KristofferStrube.Blazor.SVGAnimation.WebAppSample\KristofferStrube.Blazor.SVGAnimation.WebAppSample.csproj", "{B4DDB161-AB31-42EC-B6D7-BED669C97EE7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{D9942C3C-CB70-4D48-9E6E-401FB2B71DAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9942C3C-CB70-4D48-9E6E-401FB2B71DAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9942C3C-CB70-4D48-9E6E-401FB2B71DAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4DDB161-AB31-42EC-B6D7-BED669C97EE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4DDB161-AB31-42EC-B6D7-BED669C97EE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4DDB161-AB31-42EC-B6D7-BED669C97EE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4DDB161-AB31-42EC-B6D7-BED669C97EE7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
