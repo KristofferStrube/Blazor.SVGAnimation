@@ -1,4 +1,4 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](/LICENSE.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/KristofferStrube/Blazor.SVGAnimation)](https://github.com/KristofferStrube/Blazor.SVGAnimation/issues)
 [![GitHub forks](https://img.shields.io/github/forks/KristofferStrube/Blazor.SVGAnimation)](https://github.com/KristofferStrube/Blazor.SVGAnimation/network/members)
 [![GitHub stars](https://img.shields.io/github/stars/KristofferStrube/Blazor.SVGAnimation)](https://github.com/KristofferStrube/Blazor.SVGAnimation/stargazers)
@@ -8,85 +8,111 @@
 # Introduction
 A Blazor WASM wrapper for the SVG Animation browser API.
 
-With the wrapper we can `begin`, `end`, subscribe to events and see the status of SVG Animations from Blazor WASM without writing any JS.
+With the wrapper, we can listen to the `begin`, `end`, and `repeat` events, see the status of SVG Animations, and start and stop animations at specific times from Blazor.
 
 The specs for the API can be found at https://svgwg.org/specs/animations/#IDL
 
 ## Demo
 The sample project can be demoed at https://kristofferstrube.github.io/Blazor.SVGAnimation/
 
-On each page you can find the corresponding code for the example in the top right corner.
+On each page, you can find the corresponding code for the example in the top right corner.
 
 # Getting Started
 ## Prerequisites
-You need to install .NET 6.0 or newer to use the library.
+You need to install .NET 7.0 or newer to use the library.
 
-[Download .NET 6](https://dotnet.microsoft.com/download/dotnet/6.0)
+[Download .NET 7](https://dotnet.microsoft.com/download/dotnet/7.0)
 
 ## Installation
-You can install the package via Nuget with the Package Manager in your IDE or alternatively using the command line:
+You can install the package via Nuget with the Package Manager in your IDE or using the command line:
 ```bash
 dotnet add package KristofferStrube.Blazor.SVGAnimation
 ```
 
 # Usage
-The package can be used in Blazor WebAssembly projects.
+The package can be used in all Blazor projects.
 ## Import
 You also need to reference the package in order to use it in your pages. This can be done in `_Import.razor` by adding the following.
 ```razor
 @using KristofferStrube.Blazor.SVGAnimation
 ```
-## Add to service collection
-An easy way to make the service available in all your pages is by registering it in the `IServiceCollection` so that it can be dependency injected in the pages that need it. This is done in `Program.cs` by adding the following before you build the host and run it.
-```csharp
-var builder = WebAssemblyHostBuilder.CreateDefault(args);
-builder.RootComponents.Add<App>("#app");
-builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// Other services are added.
-
-builder.Services.AddSVGAnimationService();
-
-await builder.Build().RunAsync();
-```
-## Inject in page
-Then the service can be injected in a page like so:
+## Creating wrapper instances
+The primary part of this library is a wrapper class for `SVGAnimationElement`s which can be instantiated from your code using the static `CreateAsync` methods on the wrapper class.
 ```razor
-@inject ISVGAnimationService SVGAnimationService;
-```
-Then you can use `SVGAnimationService` to wrap an `animate`, `set`, `animateMotion`, `mpath`, `animateTransform`, or `discard` element like so:
-```razor
+@inject IJSRuntime JSRuntime
+
 <svg width="100px" height="100px">
-    <rect @onclick="OnClick"
-          x="20"
-          y="10"
-          width="60"
-          height="80"
-          fill="yellow">
-        <animate @ref="elementReference"
-                    attributeName="fill"
-                    values="yellow;green"
-                    begin="indefinite"
-                    dur="3s"
-                    fill="freeze" />
+    <rect @onclick="SquareClicked"
+          width="100"
+          height="100"
+          fill="red">
+        <animate @ref="colorAnimationElementReference"
+                 attributeName="fill"
+                 values="red;yellow;red"
+                 begin="indefinite"
+                 dur="3s" />
     </rect>
 </svg>
 
 @code {
-    protected ElementReference elementReference { get; set; }
-    protected SVGAnimationElement animation;
+    private ElementReference colorAnimationElementReference = default!;
+
+    private async void SquareClicked()
+    {
+        SVGAnimationElement colorAnimationElement = await SVGAnimationElement.CreateAsync(JSRuntime, colorAnimationElementReference);
+        await colorAnimationElement.BeginElementAsync();
+    }
+}
+```
+You can also use a `SVGAnimationElement` to listen for the `beginEvent`, `endEvent`, and `repeatEvent` events. The following is an example of listening for when a repeat event happens.
+```razor
+@using KristofferStrube.Blazor.DOM
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+<b>Number of repeats: </b> @repeats
+<br />
+<svg width="100px" height="100px">
+    <rect @onclick="SquareClicked"
+          width="100"
+          height="100"
+          fill="red">
+        <animate @ref="colorAnimationElementReference"
+                 attributeName="fill"
+                 values="red;yellow;red"
+                 begin="indefinite"
+                 repeatCount="indefinite"
+                 dur="1s" />
+    </rect>
+</svg>
+
+@code {
+    private ElementReference colorAnimationElementReference = default!;
+    private SVGAnimationElement colorAnimationElement = default!;
+    private EventListener<Event> repeatListener = default!;
+    private int repeats = 0;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender) return;
+        colorAnimationElement = await SVGAnimationElement.CreateAsync(JSRuntime, colorAnimationElementReference);
+        repeatListener = await colorAnimationElement.AddOnRepeatEventListenerAsync(_ =>
         {
-            animation = await SVGAnimationService.GreateSVGAnimationElement(elementReference);
-        }
+            repeats++;
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
     }
 
-    private async void OnClick()
+    private async void SquareClicked()
     {
-        await animation.BeginElementAsync();
+        await colorAnimationElement.BeginElementAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await colorAnimationElement.RemoveOnRepeatEventListenerAsync(repeatListener);
     }
 }
 ```
@@ -95,7 +121,7 @@ Then you can use `SVGAnimationService` to wrap an `animate`, `set`, `animateMoti
 Feel free to open issues on the repository if you find any errors with the package or have wishes for features.
 
 # Related articles
-This repository was build with inspiration and help from the following series of articles:
+This repository was built with inspiration and help from the following series of articles:
 
 - [Wrapping JavaScript libraries in Blazor WebAssembly/WASM](https://blog.elmah.io/wrapping-javascript-libraries-in-blazor-webassembly-wasm/)
 - [Call anonymous C# functions from JS in Blazor WASM](https://blog.elmah.io/call-anonymous-c-functions-from-js-in-blazor-wasm/)
