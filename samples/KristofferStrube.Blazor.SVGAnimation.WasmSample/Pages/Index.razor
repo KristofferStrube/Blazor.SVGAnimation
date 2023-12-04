@@ -1,5 +1,7 @@
 ﻿@page "/"
-@inject ISVGAnimationService SVGAnimationService;
+@using KristofferStrube.Blazor.DOM
+@implements IDisposable
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Blazor.SVGAnimation - Begin Animation</PageTitle>
 
@@ -40,35 +42,47 @@
 @code {
     protected ElementReference dataAnimationElementReference { get; set; }
     protected ElementReference colorAnimationElementReference { get; set; }
-    protected SVGAnimationElement dataAnimation;
-    protected SVGAnimationElement colorAnimation;
+    protected SVGAnimationElementInProcess dataAnimation = default!;
+    protected SVGAnimationElement colorAnimation = default!;
+    protected EventListenerInProcess<EventInProcess, Event> beginEventListener = default!;
+    protected EventListenerInProcess<EventInProcess, Event> endEventListener = default!;
+    protected EventListenerInProcess<EventInProcess, Event> repeatEventListener = default!;
     protected string log = "";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            dataAnimation = await SVGAnimationService.GreateSVGAnimationElement(dataAnimationElementReference);
-            colorAnimation = await SVGAnimationService.GreateSVGAnimationElement(colorAnimationElementReference);
+        if (!firstRender) return;
 
-            await dataAnimation.SubscribeToBeginAsync(() => {
-                log += "Begin event fired\n";
-                StateHasChanged();
-            });
-            await dataAnimation.SubscribeToEndAsync(() => {
-                log += "End event fired\n";
-                StateHasChanged();
-            });
-            await dataAnimation.SubscribeToRepeatAsync(() => {
-                log += "Repeat event fired\n";
-                StateHasChanged();
-            });
-        }
+        dataAnimation = await SVGAnimationElementInProcess.CreateAsync(JSRuntime, dataAnimationElementReference);
+        colorAnimation = await SVGAnimationElement.CreateAsync(JSRuntime, colorAnimationElementReference);
+
+        beginEventListener = await dataAnimation.AddOnBeginEventListenerAsync(_ =>
+        {
+            log += "Begin event fired\n";
+            StateHasChanged();
+        });
+        endEventListener = await dataAnimation.AddOnEndEventListenerAsync(_ =>
+        {
+            log += "End event fired\n";
+            StateHasChanged();
+        });
+        repeatEventListener = await dataAnimation.AddOnRepeatEventListenerAsync(_ =>
+        {
+            log += "Repeat event fired\n";
+            StateHasChanged();
+        });
     }
 
     private async void PaperClicked()
     {
-        await dataAnimation.BeginElementAsync();
+        dataAnimation.BeginElement();
         await colorAnimation.BeginElementAsync();
+    }
+
+    public void Dispose()
+    {
+        dataAnimation.RemoveOnBeginEventListener(beginEventListener);
+        dataAnimation.RemoveOnEndEventListener(endEventListener);
+        dataAnimation.RemoveOnRepeatEventListener(repeatEventListener);
     }
 }
