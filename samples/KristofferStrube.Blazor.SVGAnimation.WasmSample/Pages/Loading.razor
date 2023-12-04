@@ -1,5 +1,7 @@
 ﻿@page "/Loading"
-@inject ISVGAnimationService SVGAnimationService;
+@using KristofferStrube.Blazor.DOM
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Blazor.SVGAnimation - Loading Animation</PageTitle>
 <p>We can <code>begin</code> an animation, have it run <code>indefinite</code>, and <code>end</code> it at a full cycle to have a nice stop</p>
@@ -41,27 +43,30 @@
 
 @code {
     protected ElementReference arrowAnimateElement { get; set; }
-    protected SVGAnimationElement arrowAnimation;
+    protected SVGAnimationElement arrowAnimation = default!;
+    protected EventListener<Event> beginEventListener = default!;
+    protected EventListener<Event> endEventListener = default!;
     protected AnimationStatus Status = AnimationStatus.Still;
     protected float animationTime = 2f;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            arrowAnimation = await SVGAnimationService.GreateSVGAnimationElement(arrowAnimateElement);
+        if (!firstRender) return;
 
-            await arrowAnimation.SubscribeToBeginAsync(() =>
-            {
-                Status = AnimationStatus.Running;
-                StateHasChanged();
-            });
-            await arrowAnimation.SubscribeToEndAsync(() =>
-            {
-                Status = AnimationStatus.Still;
-                StateHasChanged();
-            });
-        }
+        arrowAnimation = await SVGAnimationElement.CreateAsync(JSRuntime, arrowAnimateElement);
+
+        beginEventListener = await arrowAnimation.AddOnBeginEventListenerAsync(_ =>
+        {
+            Status = AnimationStatus.Running;
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
+        endEventListener = await arrowAnimation.AddOnEndEventListenerAsync(_ =>
+        {
+            Status = AnimationStatus.Still;
+            StateHasChanged();
+            return Task.CompletedTask;
+        });
     }
 
     private async void StartAnimation()
@@ -91,5 +96,11 @@
         Still,
         Running,
         Stopping
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await arrowAnimation.RemoveOnBeginEventListenerAsync(beginEventListener);
+        await arrowAnimation.RemoveOnEndEventListenerAsync(endEventListener);
     }
 }
