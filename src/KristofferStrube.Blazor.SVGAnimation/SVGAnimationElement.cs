@@ -1,7 +1,7 @@
-﻿using Microsoft.JSInterop;
-using KristofferStrube.Blazor.DOM;
+﻿using KristofferStrube.Blazor.DOM;
 using KristofferStrube.Blazor.SVGAnimation.Extensions;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace KristofferStrube.Blazor.SVGAnimation;
 
@@ -23,8 +23,8 @@ public class SVGAnimationElement : EventTarget
 
     public static new async Task<SVGAnimationElement> CreateAsync(IJSRuntime jSRuntime, ElementReference elementReference)
     {
-        var helper = await jSRuntime.GetHelperAsync();
-        var jSInstance = await helper.InvokeAsync<IJSObjectReference>("getJSReference", elementReference);
+        IJSObjectReference helper = await jSRuntime.GetHelperAsync();
+        IJSObjectReference jSInstance = await helper.InvokeAsync<IJSObjectReference>("getJSReference", elementReference);
         return new(jSRuntime, jSInstance);
     }
 
@@ -44,8 +44,9 @@ public class SVGAnimationElement : EventTarget
     [Obsolete("This is not compatible with Blazor WASM so it will be removed in the next major version. Either use the SVGAnimationElementInProcess variant or use the GetTargetElementAsync method instead.")]
     public IJSObjectReference TargetElement => helper.Invoke<IJSObjectReference>("getAttribute", JSReference, "targetElement");
 
-    public async Task<IJSObjectReference> GetTargetElementAsync() {
-        return await helper.InvokeAsync<IJSObjectReference>("getAttribute", JSReference, "targetElement"); 
+    public async Task<IJSObjectReference> GetTargetElementAsync()
+    {
+        return await helper.InvokeAsync<IJSObjectReference>("getAttribute", JSReference, "targetElement");
     }
 
     public async Task<EventListener<Event>> AddOnBeginEventListenerAsync(Func<Event, Task> callback, AddEventListenerOptions? options = null)

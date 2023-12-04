@@ -26,8 +26,8 @@ public class SVGAnimationService : IAsyncDisposable, ISVGAnimationService
     [Obsolete("This doesn't follow the pattern for creation of wrapper object that we wish to continue with so it will be removed in the next major release. Use one of the static SVGAnimationElement.CreateAsync methods instead.")]
     public async ValueTask<SVGAnimationElement> GreateSVGAnimationElement(ElementReference elementReference)
     {
-        var helper = await helperTask.Value;
-        var jsReference = await helper.InvokeAsync<IJSObjectReference>("getJSReference", elementReference);
+        IJSInProcessObjectReference helper = await helperTask.Value;
+        IJSObjectReference jsReference = await helper.InvokeAsync<IJSObjectReference>("getJSReference", elementReference);
         return new SVGAnimationElement(jSRuntime, jsReference, helper);
     }
 
@@ -35,7 +35,7 @@ public class SVGAnimationService : IAsyncDisposable, ISVGAnimationService
     {
         if (helperTask.IsValueCreated)
         {
-            var module = await helperTask.Value;
+            IJSInProcessObjectReference module = await helperTask.Value;
             await module.DisposeAsync();
         }
     }

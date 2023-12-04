@@ -3,7 +3,6 @@ using KristofferStrube.Blazor.DOM.Extensions;
 using KristofferStrube.Blazor.WebIDL;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using System.Diagnostics.Tracing;
 
 namespace KristofferStrube.Blazor.SVGAnimation;
 
@@ -21,11 +20,11 @@ public class SVGAnimationElementInProcess : SVGAnimationElement, IEventTargetInP
         return new SVGAnimationElementInProcess(jSRuntime, domInProcessHelper, inProcessHelper, jSReference);
     }
 
-    public new static async Task<SVGAnimationElementInProcess> CreateAsync(IJSRuntime jSRuntime, ElementReference elementReference)
+    public static new async Task<SVGAnimationElementInProcess> CreateAsync(IJSRuntime jSRuntime, ElementReference elementReference)
     {
         IJSInProcessObjectReference domInProcessHelper = await DOM.Extensions.IJSRuntimeExtensions.GetInProcessHelperAsync(jSRuntime);
         IJSInProcessObjectReference inProcessHelper = await Extensions.IJSRuntimeExtensions.GetInProcessHelperAsync(jSRuntime);
-        var jSInstance = await inProcessHelper.InvokeAsync<IJSInProcessObjectReference>("getJSReference", elementReference);
+        IJSInProcessObjectReference jSInstance = await inProcessHelper.InvokeAsync<IJSInProcessObjectReference>("getJSReference", elementReference);
         return new SVGAnimationElementInProcess(jSRuntime, domInProcessHelper, inProcessHelper, jSInstance);
     }
 
@@ -106,6 +105,7 @@ public class SVGAnimationElementInProcess : SVGAnimationElement, IEventTargetInP
     {
         RemoveEventListener("repeatEvent", callback, options);
     }
+
     public float GetStartTime()
     {
         return JSReference.Invoke<float>("getStartTime");
