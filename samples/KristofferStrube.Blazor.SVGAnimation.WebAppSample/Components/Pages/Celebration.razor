@@ -1,0 +1,17 @@
+﻿@page "/Celebration"
+@using KristofferStrube.Blazor.SVGAnimation.WebAppSample.Confetti
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Blazor.SVGAnimation - Celebration</PageTitle>
+
+<button class="btn btn-primary" @onclick="() => ConfettiService.Activate(new())">Confetti from bottom!</button>
+<div style="height:40vh;"></div>
+<button @ref=button class="btn btn-primary" @onclick="() => ConfettiService.Activate(new() { Mode = ConfettiOriginMode.FromElement, Origin = button })">Confetti from this botton!</button>
+
+@code {
+    private ElementReference button;
+
+    [Inject]
+    public required ConfettiService ConfettiService { get; set; }
+}

@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using KristofferStrube.Blazor.SVGAnimation.WebAppSample.Confetti
+@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
 <div class="page">
@@ -18,6 +19,8 @@
         </article>
     </main>
 </div>
+
+<Confetti @rendermode="InteractiveServer" />
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.

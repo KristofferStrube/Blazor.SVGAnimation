@@ -1,10 +1,13 @@
 using KristofferStrube.Blazor.SVGAnimation.WebAppSample.Components;
+using KristofferStrube.Blazor.SVGAnimation.WebAppSample.Confetti;
 using Microsoft.AspNetCore.Components.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
+builder.Services
+    .AddConfettiService()
+    .AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var app = builder.Build();
