@@ -12,6 +12,7 @@
 @code {
     private double width;
     private double height;
+    private bool playing = false;
 
     [Inject]
     public required IJSRuntime JSRuntime { get; set; }
@@ -38,8 +39,10 @@
 
     public async void HandleActivated(object? sender, ConfettiOptions options)
     {
+        if (playing) return;
+
         (double X, double Y)? originPosition = null;
-        if (options.Origin is {} origin)
+        if (options.Origin is { } origin)
         {
             var helper = await JSRuntime.GetHelperAsync();
             var jSInstance = await helper.InvokeAsync<IJSObjectReference>("getJSReference", origin);
@@ -52,7 +55,7 @@
             .Select(i =>
                 new ConfettiPiece(
                     options.Colors[Random.Shared.Next(options.Colors.Length)],
-                    options.Miliseconds + (int)((Random.Shared.NextDouble() * 2 - 1) * options.VariationInMilliseconds),
+                    options.Milliseconds + (int)((Random.Shared.NextDouble() * 2 - 1) * options.VariationInMilliseconds),
                     options.Mode switch
                     {
                         ConfettiOriginMode.FromBottomCenter => FromBottomCenterPositions(),
@@ -61,9 +64,11 @@
                     }
                 )
             ).ToList();
+        playing = true;
         StateHasChanged();
-        await Task.Delay(options.Miliseconds + options.VariationInMilliseconds);
+        await Task.Delay(options.Milliseconds + options.VariationInMilliseconds);
         confettiPieces = new();
+        playing = false;
         StateHasChanged();
     }
 

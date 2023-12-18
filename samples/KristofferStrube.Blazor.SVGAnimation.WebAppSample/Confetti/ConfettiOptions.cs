@@ -6,7 +6,7 @@ public class ConfettiOptions : EventArgs
 {
     public int Pieces { get; set; } = 300;
 
-    public int Miliseconds { get; set; } = 1000;
+    public int Milliseconds { get; set; } = 1000;
 
     public int VariationInMilliseconds { get; set; } = 200;
 
