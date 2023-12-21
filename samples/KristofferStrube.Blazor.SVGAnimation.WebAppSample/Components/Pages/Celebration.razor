@@ -5,13 +5,25 @@
 
 <PageTitle>Blazor.SVGAnimation - Celebration</PageTitle>
 
-<button class="btn btn-primary" @onclick="() => ConfettiService.Activate(new())">Confetti from bottom!</button>
+<button class="btn btn-primary" @onclick="ConfettiFromBottom">Confetti from bottom!</button>
+
 <div style="height:40vh;"></div>
-<button @ref=button class="btn btn-primary" @onclick="() => ConfettiService.Activate(new() { Mode = ConfettiOriginMode.FromElement, Origin = button })">Confetti from this botton!</button>
+
+<button @ref=button class="btn btn-primary" @onclick="ConfettiFromButton">Confetti from this botton!</button>
 
 @code {
     private ElementReference button;
 
     [Inject]
     public required ConfettiService ConfettiService { get; set; }
+
+    public void ConfettiFromBottom() => ConfettiService.Activate(new());
+
+    public void ConfettiFromButton() =>
+        ConfettiService.Activate(new() {
+            Mode = ConfettiOriginMode.FromElement,
+            Origin = button
+        });
 }
+
+
